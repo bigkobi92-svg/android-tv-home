@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Home screen configuration (tested on a TCL UnionTV, Android TV 9). Edit this file, then run launcher/build-and-install.sh.
+  Package names: adb shell pm list packages
+-->
+<resources>
+
+    <!-- "Your apps" row, in this order, followed by All apps. Apps that aren't installed are skipped. -->
+    <string-array name="featured_apps">
+        <item>com.netflix.ninja</item>
+        <item>com.google.android.youtube.tv</item>
+        <item>com.amazon.amazonvideo.livingroom</item>
+        <item>com.apple.atve.androidtv.appletv</item>
+        <item>com.streamflixreborn.streamflix</item>
+        <item>com.spotify.tv.android</item>
+        <item>org.smarttube.stable</item>
+    </string-array>
+
+    <!-- Never shown anywhere (Live TV is in the Inputs menu; the others are TCL promos). -->
+    <string-array name="hidden_apps">
+        <item>com.tcl.tv</item>
+        <item>com.tcl.partnercustomizer</item>
+        <item>com.tcl.browser</item>
+        <item>com.tcl.assigncode</item>
+    </string-array>
+
+    <!-- The TV's Live TV / tuner app, offered at the end of the Inputs menu. -->
+    <string name="live_tv_package" translatable="false">com.tcl.tv</string>
+
+    <!-- Featured banner: titles streaming in this country on these services (TMDB provider id | app package | label).
+         Only services whose app is installed are used. -->
+    <string name="watch_region" translatable="false">GH</string>
+    <string-array name="streaming_services">
+        <item>8|com.netflix.ninja|Netflix</item>
+        <item>350|com.apple.atve.androidtv.appletv|Apple TV</item>
+        <item>119|com.amazon.amazonvideo.livingroom|Prime Video</item>
+    </string-array>
+
+    <!-- Without a TMDB key (res/values/secrets.xml), these free iTunes charts are used instead. -->
+    <string name="fallback_movies_feed" translatable="false">https://itunes.apple.com/us/rss/topmovies/limit=20/json</string>
+    <string name="fallback_shows_feed" translatable="false">https://itunes.apple.com/us/rss/toptvseasons/limit=20/json</string>
+
+    <!-- Weather (Open-Meteo, free, no key). -->
+    <string name="weather_city" translatable="false">Accra</string>
+    <string name="weather_latitude" translatable="false">5.6037</string>
+    <string name="weather_longitude" translatable="false">-0.1870</string>
+
+    <!-- Morning screen: the TV wakes at this time every day and shows weather and headlines for this many minutes. -->
+    <integer name="morning_hour">6</integer>
+    <integer name="morning_minute">0</integer>
+    <integer name="morning_minutes_on">30</integer>
+    <string-array name="news_feeds">
+        <item>Joy Online|https://www.myjoyonline.com/feed/</item>
+        <item>BBC Africa|https://feeds.bbci.co.uk/news/world/africa/rss.xml</item>
+    </string-array>
+
+    <!-- Phone remote: open http://<TV address>:<port> on a phone on the same Wi-Fi. -->
+    <integer name="remote_port">8765</integer>
+</resources>

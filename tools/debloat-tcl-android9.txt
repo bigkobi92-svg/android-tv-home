@@ -1,0 +1,47 @@
+# TCL UnionTV (brand TCL, Realtek), Android TV 9, build PPR2.180905.006.A1
+# Stock launcher: com.google.android.tvlauncher (launcher/build-and-install.sh switches it off).
+# Everything here is DISABLED for user 0, not uninstalled. Comment out any line to keep it.
+# Apply:  TV_HOST=<tv ip> tools/disable.sh     Undo:  TV_HOST=<tv ip> tools/restore.sh
+#
+# Kept on purpose: YouTube, Netflix, Apple TV, StreamFlix, Chromecast (mediashell),
+# Google voice search (katniss), firmware updates (com.tcl.rc.ota, com.tcl.versionUpdateApp),
+# USB media (com.tcl.ui_mediaCenter, videoplayer, imageplayer, audioplayer).
+# Never touch: com.tcl.tv, tvinput, sourcemananger, tvpassthrough, framework.custom, settings,
+# keycustomfunctionservice (also the fallback home), tcl_bt_rcu_service, autopair, keyhelp.
+
+# TCL telemetry and remote management
+com.tcl.bi                             # analytics: Firebase, boot and network monitors
+com.tcl.common.terminalmanagerplus     # TCL remote device management service
+
+# TCL content, ads and promos
+com.tcl.tv.tclhome_passive             # pushes TCL content to the home screen at boot
+# com.tcl.partnercustomizer            # KEEP: disabling it removes the Inputs button from home
+com.tcl.esticker                       # retail store-mode stickers
+com.tcl.usercenter                     # TCL account sign-up nags
+com.tcl.appmarket2                     # TCL app store, duplicates Google Play
+
+# Cleaners and duplicates
+com.tcl.tvweishi                       # "TV guard" cleaner with its own silent installer
+com.tcl.MultiScreenInteraction_TV      # TCL phone-mirroring, 55 MB in RAM; Chromecast does this
+
+# Unused Google / Android
+com.google.android.music               # Play Music, shut down by Google
+com.google.android.play.games
+com.google.android.feedback
+com.google.android.tv.bugreportsender
+com.google.android.marvin.talkback     # screen reader
+com.android.printspooler
+com.google.android.leanbacklauncher    # old home screen, not in use
+com.google.android.leanbacklauncher.partnercustomizer
+com.google.android.leanbacklauncher.partnerwidget
+com.google.android.leanbacklauncher.recommendations
+
+# Streaming apps not used
+# com.amazon.amazonvideo.livingroom    # Prime Video: uncomment to switch it off
+
+# Only served the stock home screen and the old screensaver (disabled after installing launcher/)
+com.google.android.tvrecommendations
+com.google.android.backdrop
+
+# Stock home screen, disabled by hand after installing launcher/ (restore.sh re-enables it):
+# com.google.android.tvlauncher

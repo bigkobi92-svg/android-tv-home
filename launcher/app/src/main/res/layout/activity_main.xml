@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TV home: side menu on the left; to its right a scrolling page with tabs and status, the featured banner,
+  then Your apps, Recently used and Trending rows. All apps and More info open as overlays.
+  Screen is 960 x 540 dp on this TV.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF08090B">
+
+    <LinearLayout
+        android:id="@+id/rail"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingTop="26dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginBottom="34dp"
+            android:alpha="0.85"
+            android:src="@drawable/ic_tv"
+            android:importantForAccessibility="no" />
+
+        <ImageView android:id="@+id/railHome" style="@style/RailButton" android:src="@drawable/ic_home" android:contentDescription="@string/tab_home" />
+        <ImageView android:id="@+id/railSearch" style="@style/RailButton" android:src="@drawable/ic_search" android:contentDescription="@string/search" />
+        <ImageView android:id="@+id/railMovies" style="@style/RailButton" android:src="@drawable/ic_movie" android:contentDescription="@string/tab_movies" />
+        <ImageView android:id="@+id/railInputs" style="@style/RailButton" android:src="@drawable/ic_tv" android:contentDescription="@string/inputs" />
+        <ImageView android:id="@+id/railApps" style="@style/RailButton" android:src="@drawable/ic_apps" android:contentDescription="@string/all_apps" />
+        <ImageView android:id="@+id/railSettings" style="@style/RailButton" android:src="@drawable/ic_settings" android:contentDescription="@string/settings" />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="72dp"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/page"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:paddingEnd="26dp"
+            android:paddingBottom="36dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView android:id="@+id/tabHome" style="@style/Tab" android:text="@string/tab_home" />
+                <TextView android:id="@+id/tabMovies" style="@style/Tab" android:text="@string/tab_movies" />
+                <TextView android:id="@+id/tabShows" style="@style/Tab" android:text="@string/tab_shows" />
+                <TextView android:id="@+id/tabApps" style="@style/Tab" android:text="@string/tab_apps" />
+                <TextView android:id="@+id/tabSettings" style="@style/Tab" android:text="@string/settings" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/weather"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fontFamily="@font/outfit"
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/weatherDot"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/wifiIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="18dp"
+                    android:src="@drawable/ic_wifi"
+                    android:importantForAccessibility="no" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:orientation="vertical">
+
+                    <TextClock
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/outfit"
+                        android:format12Hour="h:mm a"
+                        android:format24Hour="HH:mm"
+                        android:includeFontPadding="false"
+                        android:textColor="#FFFFFFFF"
+                        android:textSize="16sp" />
+
+                    <TextClock
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="@font/outfit"
+                        android:format12Hour="EEE, MMM d"
+                        android:format24Hour="EEE, MMM d"
+                        android:includeFontPadding="false"
+                        android:textColor="#A6FFFFFF"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/hero"
+                android:layout_width="match_parent"
+                android:layout_height="236dp"
+                android:layout_marginTop="10dp"
+                android:background="#FF121317">
+
+                <ImageView
+                    android:id="@+id/heroBackdrop"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:importantForAccessibility="no" />
+
+                <ImageView
+                    android:id="@+id/heroPoster"
+                    android:layout_width="120dp"
+                    android:layout_height="180dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="44dp"
+                    android:elevation="8dp"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/hero_scrim" />
+
+                <LinearLayout
+                    android:id="@+id/heroInfo"
+                    android:layout_width="440dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="26dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/heroService"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawablePadding="7dp"
+                        android:fontFamily="@font/outfit"
+                        android:gravity="center_vertical"
+                        android:letterSpacing="0.2"
+                        android:textAllCaps="true"
+                        android:textColor="#F2FFFFFF"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/heroTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/bebas"
+                        android:includeFontPadding="false"
+                        android:lineSpacingMultiplier="0.86"
+                        android:maxLines="2"
+                        android:textColor="#FFFFFFFF"
+                        android:textSize="50sp" />
+
+                    <TextView
+                        android:id="@+id/heroOverview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/outfit"
+                        android:lineSpacingMultiplier="1.1"
+                        android:maxLines="2"
+                        android:textColor="#E6FFFFFF"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/heroMeta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="@font/outfit"
+                        android:textColor="#A6FFFFFF"
+                        android:textSize="11sp" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/btnPlay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:background="@drawable/btn_play_bg"
+                            android:drawableStart="@drawable/ic_play"
+                            android:drawablePadding="8dp"
+                            android:focusable="true"
+                            android:clickable="true"
+                            android:fontFamily="@font/outfit"
+                            android:gravity="center"
+                            android:paddingStart="18dp"
+                            android:paddingEnd="22dp"
+                            android:text="@string/play"
+                            android:textColor="#FF111111"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/btnInfo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="10dp"
+                            android:background="@drawable/btn_glass_bg"
+                            android:focusable="true"
+                            android:clickable="true"
+                            android:fontFamily="@font/outfit"
+                            android:gravity="center"
+                            android:paddingStart="20dp"
+                            android:paddingEnd="20dp"
+                            android:text="@string/more_info"
+                            android:textColor="@drawable/btn_glass_text"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/heroDots"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="12dp"
+                    android:orientation="horizontal" />
+            </FrameLayout>
+
+            <TextView android:id="@+id/appsLabel" style="@style/RowTitle" android:text="@string/your_apps" />
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/appsRow" style="@style/Row" android:layout_height="80dp" />
+
+            <TextView android:id="@+id/recentLabel" style="@style/RowTitle" android:text="@string/recently_used" />
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/recentRow" style="@style/Row" android:layout_height="106dp" />
+
+            <TextView android:id="@+id/trendLabel" style="@style/RowTitle" android:text="@string/trending_now" />
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/trendRow" style="@style/Row" android:layout_height="168dp" />
+
+            <!-- Movies / TV Shows tabs: Top on Netflix, Apple TV, Prime Video (built in code). -->
+            <LinearLayout
+                android:id="@+id/serviceRows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/credit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/outfit"
+                android:text="@string/tmdb_credit"
+                android:textColor="#59FFFFFF"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- All apps -->
+    <FrameLayout
+        android:id="@+id/allApps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F505060A"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="56dp"
+            android:layout_marginTop="34dp"
+            android:fontFamily="@font/outfit"
+            android:text="@string/all_apps"
+            android:textColor="#FFFFFFFF"
+            android:textSize="22sp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/allAppsGrid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="76dp"
+            android:clipToPadding="false"
+            android:paddingStart="48dp"
+            android:paddingEnd="48dp"
+            android:paddingBottom="30dp" />
+    </FrameLayout>
+
+    <!-- More info -->
+    <FrameLayout
+        android:id="@+id/infoPanel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="640dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/panel_bg"
+            android:orientation="horizontal"
+            android:padding="22dp">
+
+            <ImageView
+                android:id="@+id/infoPoster"
+                android:layout_width="140dp"
+                android:layout_height="210dp"
+                android:background="@drawable/tile_card"
+                android:scaleType="centerCrop"
+                android:importantForAccessibility="no" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="22dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/infoService"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/outfit"
+                    android:letterSpacing="0.2"
+                    android:textAllCaps="true"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/infoTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/bebas"
+                    android:includeFontPadding="false"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="36sp" />
+
+                <TextView
+                    android:id="@+id/infoMeta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/outfit"
+                    android:textColor="#A6FFFFFF"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/infoOverview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/outfit"
+                    android:lineSpacingMultiplier="1.15"
+                    android:maxLines="6"
+                    android:textColor="#E6FFFFFF"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/infoPlay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:background="@drawable/btn_play_bg"
+                        android:drawableStart="@drawable/ic_play"
+                        android:drawablePadding="8dp"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:fontFamily="@font/outfit"
+                        android:gravity="center"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="22dp"
+                        android:textColor="#FF111111"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/infoClose"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="10dp"
+                        android:background="@drawable/btn_glass_bg"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:fontFamily="@font/outfit"
+                        android:gravity="center"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="Close"
+                        android:textColor="@drawable/btn_glass_text"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>

@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Your TMDB key lives in launcher/local.properties (never committed):  tmdb.api.key=0123abcd...
+// Without one the home screen falls back to the free iTunes charts.
+def localProps = new Properties()
+def localFile = rootProject.file('local.properties')
+if (localFile.exists()) localFile.withInputStream { localProps.load(it) }
+def tmdbKey = localProps.getProperty('tmdb.api.key', '')
+
+android {
+    namespace 'com.gathin.tvhome'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.gathin.tvhome'
+        minSdk 26
+        targetSdk 29
+        versionCode 3
+        versionName '3.0'
+        resValue 'string', 'tmdb_api_key', tmdbKey
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    lint {
+        // The launcher is sideloaded over ADB, never published to Google Play, so Play's minimum targetSdk
+        // does not apply; without this, lintVitalRelease fails assembleRelease.
+        disable 'ExpiredTargetSdkVersion'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+}

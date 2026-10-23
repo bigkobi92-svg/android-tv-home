@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TV Remote">
+<meta name="theme-color" content="#0b0c10">
+<title>TV Remote</title>
+<style>
+/* One-handed phone remote: apps up top, volume and inputs in the thumb zone. Dark, like the TV. */
+:root { --bg: #0b0c10; --card: #16171d; --line: #26272e; --ink: #f1f0ea; --ink2: #9c9c95; --accent: #e8a33d; --ok: #4fbf8b; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.4 -apple-system, "SF Pro Text", system-ui, sans-serif; }
+body { padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+h1 { font-size: 22px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.status { font-size: 13px; color: var(--ink2); }
+.status.ok::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 6px; vertical-align: 1px; }
+h2 { font-size: 13px; font-weight: 500; color: var(--ink2); text-transform: uppercase; letter-spacing: .08em; margin: 22px 0 10px; }
+.apps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.app { all: unset; cursor: pointer; aspect-ratio: 16 / 9; border-radius: 12px; background: var(--card) center / cover no-repeat; position: relative; overflow: hidden; }
+.app span { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 8px 5px; font-size: 11px; background: linear-gradient(transparent, rgba(0,0,0,.75)); }
+.app:active, .btn:active, .chip:active { transform: scale(.96); }
+.row { display: flex; gap: 10px; }
+.btn { all: unset; cursor: pointer; flex: 1; text-align: center; padding: 16px 0; border-radius: 14px; background: var(--card); font-size: 17px; font-weight: 500; border: 1px solid var(--line); }
+.btn.big { font-size: 26px; padding: 12px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { all: unset; cursor: pointer; padding: 10px 14px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 15px; }
+.chip.on::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 7px; vertical-align: 1px; }
+form { display: flex; gap: 8px; }
+input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; }
+input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.go { all: unset; cursor: pointer; padding: 0 18px; border-radius: 12px; background: var(--ink); color: #111; font-weight: 600; }
+.note { font-size: 13px; color: var(--ink2); margin-top: 20px; }
+.toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); background: #2a2b33; padding: 10px 16px; border-radius: 999px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.pair { max-width: 360px; margin: 12vh auto 0; text-align: center; }
+.pair p { color: var(--ink2); }
+.code { font-size: 34px; letter-spacing: .4em; text-align: center; width: 100%; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header><h1 id="name">TV</h1><span class="status" id="status">Connecting…</span></header>
+
+<section id="pair" class="pair" hidden>
+  <p>Pair this phone once. A 4-digit code will appear on the TV.</p>
+  <button class="btn" id="showCode" type="button">Show code on TV</button>
+  <form id="pairForm" style="margin-top:14px" hidden>
+    <input id="code" class="code" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0000" autocomplete="one-time-code" aria-label="Code from the TV">
+    <button class="go" type="submit">Pair</button>
+  </form>
+  <p id="pairMsg"></p>
+</section>
+
+<main id="remote" hidden>
+  <h2>Apps</h2>
+  <div class="apps" id="apps"></div>
+
+  <h2>Find something to watch</h2>
+  <form id="find">
+    <input id="q" placeholder="Black Panther, Champions League…" aria-label="Title to find" enterkeyhint="search">
+    <button class="go" type="submit">Find</button>
+  </form>
+
+  <h2>Volume</h2>
+  <div class="row">
+    <button class="btn big" data-vol="down" type="button" aria-label="Volume down">−</button>
+    <button class="btn" data-vol="mute" type="button">Mute</button>
+    <button class="btn big" data-vol="up" type="button" aria-label="Volume up">+</button>
+  </div>
+
+  <h2>Inputs</h2>
+  <div class="chips" id="inputs"></div>
+
+  <h2>TV</h2>
+  <div class="row">
+    <button class="btn" data-act="home" type="button">Home</button>
+    <button class="btn" data-act="screensaver" type="button">Screensaver</button>
+    <button class="btn" data-act="morning" type="button">Morning</button>
+  </div>
+
+  <p class="note">For arrows, OK, Back and power, use the Google TV app or the TV remote. Android lets only those press keys on the TV.</p>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1600); }
+async function api(path, method = "POST") {
+  const r = await fetch(path, { method, credentials: "same-origin" });
+  if (r.status === 401) { showPair(); throw new Error("not paired"); }
+  return r.json();
+}
+function showPair() { $("remote").hidden = true; $("pair").hidden = false; $("status").textContent = "Not paired"; $("status").className = "status"; }
+async function boot() {
+  try {
+    const s = await (await fetch("/api/status")).json();
+    $("name").textContent = s.name || "TV";
+    if (!s.paired) return showPair();
+    $("pair").hidden = true; $("remote").hidden = false;
+    $("status").textContent = "Connected"; $("status").className = "status ok";
+    loadApps(); loadInputs();
+  } catch (e) { $("status").textContent = "Can't reach the TV"; }
+}
+async function loadApps() {
+  const { apps } = await api("/api/apps", "GET");
+  $("apps").innerHTML = "";
+  for (const a of apps) {
+    const b = document.createElement("button");
+    b.className = "app"; b.type = "button"; b.setAttribute("aria-label", "Open " + a.label);
+    b.style.backgroundImage = `url(/api/icon?pkg=${encodeURIComponent(a.pkg)})`;
+    b.innerHTML = `<span></span>`; b.querySelector("span").textContent = a.label;
+    b.onclick = async () => { const r = await api("/api/launch?pkg=" + encodeURIComponent(a.pkg)); toast(r.ok ? "Opening " + a.label : "Couldn't open " + a.label); };
+    $("apps").appendChild(b);
+  }
+}
+async function loadInputs() {
+  const { inputs } = await api("/api/inputs", "GET");
+  $("inputs").innerHTML = "";
+  for (const s of inputs) {
+    const b = document.createElement("button");
+    b.className = "chip" + (s.connected ? " on" : ""); b.type = "button"; b.textContent = s.label;
+    b.onclick = async () => { const r = await api("/api/input?i=" + s.i); toast(r.ok ? "Switching to " + s.label : "Couldn't switch"); };
+    $("inputs").appendChild(b);
+  }
+}
+document.querySelectorAll("[data-vol]").forEach(b => b.onclick = () => api("/api/volume?d=" + b.dataset.vol));
+document.querySelectorAll("[data-act]").forEach(b => b.onclick = async () => { const r = await api("/api/" + b.dataset.act); toast(r.ok ? "Done" : "Not available on this TV"); });
+$("find").onsubmit = async (e) => { e.preventDefault(); const q = $("q").value.trim(); if (!q) { toast("Type a title first"); return; } await api("/api/search?q=" + encodeURIComponent(q)); toast("Searching on the TV"); $("q").blur(); };
+$("showCode").onclick = async () => { await fetch("/api/pair/start", { method: "POST" }); $("pairForm").hidden = false; $("pairMsg").textContent = "Look at the TV and type the code."; $("code").focus(); };
+$("pairForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const code = $("code").value.trim();
+  if (!/^\d{4}$/.test(code)) { $("pairMsg").textContent = "Enter the 4 digits shown on the TV."; return; }
+  const r = await fetch("/api/pair?code=" + code, { method: "POST", credentials: "same-origin" });
+  if (r.ok) boot(); else $("pairMsg").textContent = "That code didn't match. Tap Show code on TV to get a new one.";
+};
+$("code").oninput = () => { $("pairMsg").textContent = ""; };
+boot();
+</script>
+</body>
+</html>

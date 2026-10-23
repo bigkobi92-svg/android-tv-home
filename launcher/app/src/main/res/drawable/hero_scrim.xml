@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark on the text side, clearing towards the picture. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape><gradient android:angle="0" android:startColor="#F2050608" android:centerColor="#99050608" android:centerX="0.45" android:endColor="#00050608" /></shape></item>
+    <item><shape><gradient android:angle="90" android:startColor="#B3050608" android:centerColor="#00050608" android:centerY="0.35" android:endColor="#00050608" /></shape></item>
+</layer-list>

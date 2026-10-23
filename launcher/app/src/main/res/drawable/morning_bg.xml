@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sunrise over Accra: deep blue night above, warm orange at the horizon. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape><gradient android:angle="270" android:startColor="#FF0E1630" android:centerColor="#FF3B2A4A" android:centerY="0.55" android:endColor="#FFB4552E" /></shape>
+    </item>
+    <item>
+        <shape><gradient android:type="radial" android:gradientRadius="520dp" android:centerX="0.22" android:centerY="1.0" android:startColor="#80FFB25C" android:endColor="#00FFB25C" /></shape>
+    </item>
+</layer-list>
