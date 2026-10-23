@@ -17,6 +17,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Now playing on low-memory TVs, where notification access is blocked: lets the home screen read the media
+         status (dumpsys media_session). Granted once with: pm grant com.gathin.tvhome android.permission.DUMP -->
+    <uses-permission android:name="android.permission.DUMP" tools:ignore="ProtectedPermissions" />
 
     <application
         android:label="@string/app_name"
@@ -69,6 +72,17 @@
             android:exported="true"
             android:excludeFromRecents="true"
             android:screenOrientation="landscape" />
+
+        <!-- Lets the home screen see what's playing (Now playing card). Reads no notifications. -->
+        <service
+            android:name=".NowPlayingListener"
+            android:label="Now playing"
+            android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
 
         <service
             android:name=".RemoteService"

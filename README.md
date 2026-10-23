@@ -16,6 +16,10 @@ No root, nothing flashed, and everything can be undone with one script.
   (Netflix, Apple TV, Prime Video), with wide film stills from TMDB.
 - **Play** opens the show directly in Netflix when its Netflix ID is known (looked up on Wikidata).
 - Rows for **Your apps**, **Recently used** (from the TV's own usage record) and **Trending now**.
+- **Movies** and **TV Shows** pages: the Top 10 on Netflix, Apple TV and Prime Video in your country, with
+  the poster on the left of the banner.
+- **Now playing** card in the banner whenever music plays in the background (Spotify, YouTube Music...):
+  song, artist, album cover and previous / pause / next.
 - **More info** panel with the full description. All apps grid. HDMI / Live TV inputs menu.
 
 ![More info](docs/more-info.jpg)

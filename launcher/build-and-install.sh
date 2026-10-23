@@ -18,6 +18,8 @@ grep -q '^tmdb.api.key=' local.properties || echo "Note: no tmdb.api.key in laun
 PKG=com.gathin.tvhome
 "$ADB" -s "$TV" shell appops set $PKG GET_USAGE_STATS allow                      # Recently used row
 "$ADB" -s "$TV" shell pm grant $PKG android.permission.ACCESS_FINE_LOCATION 2>/dev/null || true
+"$ADB" -s "$TV" shell pm grant $PKG android.permission.DUMP 2>/dev/null || true             # Now playing (low-memory TVs)
+"$ADB" -s "$TV" shell cmd notification allow_listener $PKG/$PKG.NowPlayingListener 2>/dev/null || true  # Now playing
 "$ADB" -s "$TV" shell settings put secure screensaver_components $PKG/.GlobeDream  # night globe screensaver
 "$ADB" -s "$TV" shell settings put secure screensaver_enabled 1
 "$ADB" -s "$TV" shell cmd package set-home-activity --user 0 $PKG/.MainActivity

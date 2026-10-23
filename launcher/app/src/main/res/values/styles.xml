@@ -20,6 +20,17 @@
         <item name="android:clickable">true</item>
     </style>
 
+    <style name="NpButton">
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_marginEnd">2dp</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:background">@drawable/rail_bg</item>
+        <item name="android:tint">@drawable/rail_tint</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+    </style>
+
     <style name="Tab">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">34dp</item>

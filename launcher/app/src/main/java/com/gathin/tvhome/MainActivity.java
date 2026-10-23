@@ -51,6 +51,58 @@ public class MainActivity extends Activity {
     private TextView heroService, heroTitle, heroOverview, heroMeta, trendLabel, recentLabel, credit;
     private LinearLayout heroDots, serviceRows;
     private View page0, appsLabel;
+
+    // Now playing card
+    private View nowPlaying;
+    private ImageView npArt, npPlay;
+    private TextView npTitle, npArtist, npApp;
+    private android.media.session.MediaSessionManager sessions;
+    private android.media.session.MediaController npController;
+    private boolean posterModeNow;
+    private float infoWidthDp = 440;
+    private boolean useDumpsys;
+    private String npShownPkg, npShownSong;
+    private final Runnable pollMedia = new Runnable() {
+        @Override
+        public void run() {
+            bg.execute(() -> {
+                List<MediaStatus.Playing> list = MediaStatus.read();
+                String cover = null;
+                for (MediaStatus.Playing p : list) {
+                    if (p.audible || p.pkg.equals(npShownPkg)) {
+                        cover = MediaStatus.coverUrl(p.title, p.artist);
+                        break;
+                    }
+                }
+                String coverUrl = cover;
+                handler.post(() -> {
+                    showFromDumpsys(list);
+                    if (coverUrl != null && nowPlaying.getVisibility() == View.VISIBLE) {
+                        ImageLoader.get(MainActivity.this).into(npArt, coverUrl, (int) (64 * density), (int) (64 * density));
+                    }
+                });
+            });
+            handler.postDelayed(this, 3000);
+        }
+    };
+    private final android.media.session.MediaSessionManager.OnActiveSessionsChangedListener sessionsChanged =
+            this::pickSession;
+    private final android.media.session.MediaController.Callback npCallback = new android.media.session.MediaController.Callback() {
+        @Override
+        public void onPlaybackStateChanged(android.media.session.PlaybackState state) {
+            updateNowPlaying();
+        }
+
+        @Override
+        public void onMetadataChanged(android.media.MediaMetadata metadata) {
+            updateNowPlaying();
+        }
+
+        @Override
+        public void onSessionDestroyed() {
+            setController(null);
+        }
+    };
     private boolean hasRecents;
     private RecyclerView appsRow, recentRow, trendRow, allAppsGrid;
     private TextView[] tabs;
@@ -104,6 +156,35 @@ public class MainActivity extends Activity {
         serviceRows = findViewById(R.id.serviceRows);
         page0 = findViewById(R.id.page);
         appsLabel = findViewById(R.id.appsLabel);
+        nowPlaying = findViewById(R.id.nowPlaying);
+        npArt = findViewById(R.id.npArt);
+        npPlay = findViewById(R.id.npPlay);
+        npTitle = findViewById(R.id.npTitle);
+        npArtist = findViewById(R.id.npArtist);
+        npApp = findViewById(R.id.npApp);
+        round(npArt, 8);
+        findViewById(R.id.npPrev).setOnClickListener(v -> {
+            if (npController != null) npController.getTransportControls().skipToPrevious();
+            else MediaStatus.key(this, android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+        });
+        findViewById(R.id.npNext).setOnClickListener(v -> {
+            if (npController != null) npController.getTransportControls().skipToNext();
+            else MediaStatus.key(this, android.view.KeyEvent.KEYCODE_MEDIA_NEXT);
+        });
+        npPlay.setOnClickListener(v -> {
+            if (npController == null) {
+                MediaStatus.key(this, android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+                handler.postDelayed(() -> handler.post(pollMedia), 600);
+                return;
+            }
+            android.media.session.PlaybackState st = npController.getPlaybackState();
+            if (st != null && st.getState() == android.media.session.PlaybackState.STATE_PLAYING) {
+                npController.getTransportControls().pause();
+            } else {
+                npController.getTransportControls().play();
+            }
+        });
+        findViewById(R.id.npPrev).setNextFocusLeftId(R.id.btnInfo);
         btnPlay = findViewById(R.id.btnPlay);
         btnInfo = findViewById(R.id.btnInfo);
         appsRow = findViewById(R.id.appsRow);
@@ -190,6 +271,7 @@ public class MainActivity extends Activity {
         loadCatalog();
         weather.refresh();
         prefetchFlights();
+        watchSessions(true);
         handler.removeCallbacks(rotate);
         handler.postDelayed(rotate, ROTATE_MS);
         handler.postDelayed(minuteTick, 60_000L);
@@ -214,6 +296,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        watchSessions(false);
         handler.removeCallbacks(rotate);
         handler.removeCallbacks(minuteTick);
     }
@@ -347,7 +430,7 @@ public class MainActivity extends Activity {
                 ImageLoader.get(this).into(heroPoster, t.poster, heroPoster.getLayoutParams().width,
                         heroPoster.getLayoutParams().height);
             }
-            fitTitle(t.title, posterMode);
+            fitTitle(t.title);
             heroService.setText(t.serviceLabel != null ? t.serviceLabel : page.fromTmdb ? "Trending this week" : t.movie ? "Top movies" : "Top TV shows");
             String label = heroService.getText().toString();
             if (t.servicePkg != null) {
@@ -373,6 +456,7 @@ public class MainActivity extends Activity {
 
     /** Places the poster and the details block for the two banner layouts. */
     private void layoutHero(boolean posterMode, boolean wide) {
+        posterModeNow = posterMode;
         android.widget.FrameLayout.LayoutParams pp = (android.widget.FrameLayout.LayoutParams) heroPoster.getLayoutParams();
         android.widget.FrameLayout.LayoutParams ip = (android.widget.FrameLayout.LayoutParams) heroInfo.getLayoutParams();
         heroPoster.setVisibility(posterMode || !wide ? View.VISIBLE : View.GONE);
@@ -385,7 +469,8 @@ public class MainActivity extends Activity {
             ip.gravity = android.view.Gravity.START | android.view.Gravity.CENTER_VERTICAL;
             ip.setMarginStart((int) ((32 + 130 + 28) * density));
             ip.topMargin = 0;
-            ip.width = (int) (560 * density);
+            infoWidthDp = fitBesideCard(190, 560);
+            ip.width = (int) (infoWidthDp * density);
         } else {
             pp.width = (int) (120 * density);
             pp.height = (int) (180 * density);
@@ -395,7 +480,8 @@ public class MainActivity extends Activity {
             ip.gravity = android.view.Gravity.START | android.view.Gravity.TOP;
             ip.setMarginStart((int) (32 * density));
             ip.topMargin = (int) (24 * density);
-            ip.width = (int) (440 * density);
+            infoWidthDp = fitBesideCard(32, 440);
+            ip.width = (int) (infoWidthDp * density);
         }
         heroPoster.setLayoutParams(pp);
         heroInfo.setLayoutParams(ip);
@@ -405,8 +491,8 @@ public class MainActivity extends Activity {
      * Big for short names, smaller for long ones, so the service label, description and Play / More info always
      * fit inside the banner (Bebas Neue is about 0.44 of its size wide per letter).
      */
-    private void fitTitle(String title, boolean posterMode) {
-        float widthDp = posterMode ? 560 : 440;
+    private void fitTitle(String title) {
+        float widthDp = infoWidthDp;
         int len = title.length();
         float size;
         int lines;
@@ -424,6 +510,165 @@ public class MainActivity extends Activity {
         heroTitle.setMaxLines(lines);
         heroTitle.setText(title);
         heroOverview.setMaxLines(lines == 1 ? 2 : 1);   // a two-line title leaves room for one line of description
+    }
+
+    /** Details width so the text never runs under the Now playing card. */
+    private float fitBesideCard(float startDp, float wantDp) {
+        if (nowPlaying.getVisibility() != View.VISIBLE) return wantDp;
+        float heroDp = hero.getWidth() > 0 ? hero.getWidth() / density : 862;
+        return Math.max(260, Math.min(wantDp, heroDp - 16 - 270 - 20 - startDp));
+    }
+
+    // ---- now playing ----------------------------------------------------------------------------
+
+    private void watchSessions(boolean on) {
+        try {
+            if (sessions == null) sessions = getSystemService(android.media.session.MediaSessionManager.class);
+            android.content.ComponentName me = new android.content.ComponentName(this, NowPlayingListener.class);
+            if (on) {
+                if (useDumpsys) throw new SecurityException("use dumpsys");
+                sessions.addOnActiveSessionsChangedListener(sessionsChanged, me, handler);
+                pickSession(sessions.getActiveSessions(me));
+            } else {
+                handler.removeCallbacks(pollMedia);
+                if (!useDumpsys) sessions.removeOnActiveSessionsChangedListener(sessionsChanged);
+                setController(null);
+            }
+        } catch (SecurityException e) {
+            // No notification access (blocked on low-memory TVs): read the media status instead, if allowed.
+            useDumpsys = checkSelfPermission(android.Manifest.permission.DUMP)
+                    == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            if (useDumpsys) {
+                handler.removeCallbacks(pollMedia);
+                handler.post(pollMedia);
+            }
+        }
+    }
+
+    /** The app playing right now (music in the background); keeps showing it while paused. */
+    private void pickSession(List<android.media.session.MediaController> list) {
+        android.media.session.MediaController pick = null;
+        if (list != null) {
+            for (android.media.session.MediaController c : list) {
+                if (c.getPackageName().equals(getPackageName())) continue;
+                android.media.session.PlaybackState st = c.getPlaybackState();
+                if (st != null && st.getState() == android.media.session.PlaybackState.STATE_PLAYING) {
+                    pick = c;
+                    break;
+                }
+                if (pick == null && npController != null && c.getSessionToken().equals(npController.getSessionToken())) pick = c;
+            }
+        }
+        setController(pick);
+    }
+
+    /** Card from the dumpsys reading: an app that's really making sound; keep showing it while it's paused. */
+    private void showFromDumpsys(List<MediaStatus.Playing> list) {
+        MediaStatus.Playing pick = null;
+        for (MediaStatus.Playing p : list) {
+            if (p.pkg.equals(getPackageName())) continue;
+            if (p.audible) {
+                pick = p;
+                break;
+            }
+            if (pick == null && p.pkg.equals(npShownPkg)) pick = p;
+        }
+        boolean was = nowPlaying.getVisibility() == View.VISIBLE;
+        npShownPkg = pick == null ? null : pick.pkg;
+        if (pick != null) {
+            String appLabel = pick.pkg;
+            android.graphics.drawable.Drawable appIcon = null;
+            try {
+                android.content.pm.ApplicationInfo ai = getPackageManager().getApplicationInfo(pick.pkg, 0);
+                appLabel = String.valueOf(getPackageManager().getApplicationLabel(ai));
+                appIcon = getPackageManager().getApplicationIcon(ai);
+            } catch (Exception ignored) {
+            }
+            npTitle.setText(pick.title != null ? pick.title : appLabel);
+            npArtist.setText(pick.artist != null ? pick.artist : "");
+            npArtist.setVisibility(pick.artist != null ? View.VISIBLE : View.GONE);
+            npApp.setText(appLabel);
+            if (!(pick.title + "|" + pick.artist).equals(npShownSong)) {   // new song: app icon until the cover loads
+                npArt.setTag(R.id.image_url, null);
+                npArt.setImageDrawable(appIcon);
+                npShownSong = pick.title + "|" + pick.artist;
+            }
+            npPlay.setImageResource(pick.audible ? R.drawable.ic_pause : R.drawable.ic_play);
+            npPlay.setContentDescription(pick.audible ? "Pause" : "Play");
+        }
+        nowPlaying.setVisibility(pick != null ? View.VISIBLE : View.GONE);
+        btnInfo.setNextFocusRightId(pick != null ? R.id.npPrev : View.NO_ID);
+        if ((pick != null) != was && page != null && !page.featured.isEmpty()) {
+            layoutHero(posterModeNow, page.fromTmdb);
+            fitTitle(heroTitle.getText().toString());
+        }
+    }
+
+    private void setController(android.media.session.MediaController c) {
+        if (npController != null && c != null && npController.getSessionToken().equals(c.getSessionToken())) {
+            updateNowPlaying();
+            return;
+        }
+        if (npController != null) npController.unregisterCallback(npCallback);
+        npController = c;
+        if (c != null) c.registerCallback(npCallback, handler);
+        updateNowPlaying();
+    }
+
+    private void updateNowPlaying() {
+        if (useDumpsys) return;
+        android.media.session.MediaController c = npController;
+        android.media.session.PlaybackState st = c != null ? c.getPlaybackState() : null;
+        int state = st != null ? st.getState() : android.media.session.PlaybackState.STATE_NONE;
+        boolean show = c != null && state != android.media.session.PlaybackState.STATE_NONE
+                && state != android.media.session.PlaybackState.STATE_STOPPED
+                && state != android.media.session.PlaybackState.STATE_ERROR;
+        boolean was = nowPlaying.getVisibility() == View.VISIBLE;
+        if (show) {
+            android.media.MediaMetadata md = c.getMetadata();
+            String title = md == null ? null : md.getString(android.media.MediaMetadata.METADATA_KEY_DISPLAY_TITLE);
+            if (TextUtils.isEmpty(title) && md != null) title = md.getString(android.media.MediaMetadata.METADATA_KEY_TITLE);
+            String artist = md == null ? null : md.getString(android.media.MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE);
+            if (TextUtils.isEmpty(artist) && md != null) artist = md.getString(android.media.MediaMetadata.METADATA_KEY_ARTIST);
+            if (TextUtils.isEmpty(artist) && md != null) artist = md.getString(android.media.MediaMetadata.METADATA_KEY_ALBUM_ARTIST);
+            String appLabel = c.getPackageName();
+            android.graphics.drawable.Drawable appIcon = null;
+            try {
+                android.content.pm.ApplicationInfo ai = getPackageManager().getApplicationInfo(c.getPackageName(), 0);
+                appLabel = String.valueOf(getPackageManager().getApplicationLabel(ai));
+                appIcon = getPackageManager().getApplicationIcon(ai);
+            } catch (Exception ignored) {
+            }
+            npTitle.setText(TextUtils.isEmpty(title) ? appLabel : title);
+            npArtist.setText(TextUtils.isEmpty(artist) ? "" : artist);
+            npArtist.setVisibility(TextUtils.isEmpty(artist) ? View.GONE : View.VISIBLE);
+            npApp.setText(appLabel);
+            android.graphics.Bitmap art = null;
+            String artUri = null;
+            if (md != null) {
+                for (String k : new String[]{android.media.MediaMetadata.METADATA_KEY_ALBUM_ART,
+                        android.media.MediaMetadata.METADATA_KEY_ART, android.media.MediaMetadata.METADATA_KEY_DISPLAY_ICON}) {
+                    if (art == null) art = md.getBitmap(k);
+                }
+                for (String k : new String[]{android.media.MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+                        android.media.MediaMetadata.METADATA_KEY_ART_URI, android.media.MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI}) {
+                    String u = md.getString(k);
+                    if (artUri == null && u != null && u.startsWith("http")) artUri = u;
+                }
+            }
+            if (art != null) npArt.setImageBitmap(art);
+            else if (artUri != null) ImageLoader.get(this).into(npArt, artUri, (int) (64 * density), (int) (64 * density));
+            else npArt.setImageDrawable(appIcon);
+            boolean playing = state == android.media.session.PlaybackState.STATE_PLAYING;
+            npPlay.setImageResource(playing ? R.drawable.ic_pause : R.drawable.ic_play);
+            npPlay.setContentDescription(playing ? "Pause" : "Play");
+        }
+        nowPlaying.setVisibility(show ? View.VISIBLE : View.GONE);
+        btnInfo.setNextFocusRightId(show ? R.id.npPrev : View.NO_ID);
+        if (show != was && page != null && !page.featured.isEmpty()) {   // make room for the card, or take it back
+            layoutHero(posterModeNow, page.fromTmdb);
+            fitTitle(heroTitle.getText().toString());
+        }
     }
 
     private static int serviceColor(String pkg) {
