@@ -1,5 +1,7 @@
 # Android TV Home
 
+Made by [@bigkobi92-svg](https://github.com/bigkobi92-svg).
+
 A clean, ad-free home screen for Android TV, with a phone remote, a night-globe screensaver with flying
 planes, and a morning screen with weather and headlines. Built and tested on a TCL UnionTV running
 Android TV 9, but it works on most Android TV and Google TV sets.
@@ -102,6 +104,7 @@ No root, nothing flashed, and everything can be undone with one script.
 
 ## Credits
 
+- Created by [@bigkobi92-svg](https://github.com/bigkobi92-svg).
 - Started from [Gathin23/tv-vibehack](https://github.com/Gathin23/tv-vibehack) (MIT), which also
   inspired the debloat approach.
 - Titles and images: [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not
@@ -116,4 +119,5 @@ affiliated with any of them.
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE).
+MIT © 2026 [@bigkobi92-svg](https://github.com/bigkobi92-svg). Includes work from
+[Gathin23/tv-vibehack](https://github.com/Gathin23/tv-vibehack) (MIT). See [LICENSE](LICENSE).
